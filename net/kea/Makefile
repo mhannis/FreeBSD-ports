@@ -1,11 +1,10 @@
 PORTNAME=	kea
 DISTVERSION=	3.0.2
+PORTREVISION=	1
 CATEGORIES=	net
 MASTER_SITES=	ISC/kea/${DISTVERSION}
 
-PATCHFILES+=	netgate.diff:-p1
 MASTER_SITE_BACKUP=
-FETCH_DEPENDS=	curl:ftp/curl
 
 MAINTAINER=	apevnev@me.com
 COMMENT=	Alternative DHCP implementation by ISC
@@ -68,8 +67,12 @@ post-install:
 	for i in *.conf; do ${CP} $$i ${STAGEDIR}${PREFIX}/etc/kea/$$i.sample; done
 
 pre-fetch:
+.if defined(GITLAB_TOKEN) && !empty(GITLAB_TOKEN)
+PATCHFILES+=	netgate.diff:-p1
+FETCH_DEPENDS+=	curl:ftp/curl
 	if [ ! -f "${DISTDIR}/${DIST_SUBDIR}/netgate.diff" ] || [ "$$( awk '$$1 == "SHA256" && $$2 == "(netgate.diff)" {print $$4}' "${DISTINFO_FILE}" )" != "$$( sha256 -q "${DISTDIR}/${DIST_SUBDIR}/netgate.diff" )" ]; then \
 		curl -vv --header 'PRIVATE-TOKEN: ${GITLAB_TOKEN}' -o "${DISTDIR}/${DIST_SUBDIR}/netgate.diff" "https://gitlab.netgate.com/api/v4/projects/8/repository/files/net%2Fkea%2Ffiles%2Fnetgate.diff/raw?ref=plus-devel"; \
 	fi
+.endif
 
 .include <bsd.port.mk>

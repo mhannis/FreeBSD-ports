@@ -1,0 +1,13 @@
+--- src/etc/rc.bootup.orig
++++ src/etc/rc.bootup
+@@ -120,7 +120,9 @@
+ parse_config_bootup();
+ echo "done.\n";
+ 
+-mwexec("/usr/sbin/gnid > {$g['vardb_path']}/uniqueid 2>/dev/null");
++if (is_executable('/usr/sbin/gnid')) {
++	mwexec("/usr/sbin/gnid > {$g['vardb_path']}/uniqueid 2>/dev/null");
++}
+ 
+ /* Import the Installer network settings. */
+ if (file_exists("{$g['conf_path']}/trigger_initial_wizard") &&

@@ -91,10 +91,30 @@ get_repo_name() {
 	/bin/cat "${repo_name}"
 }
 
-get_repoc_feat() {
-	local _err _feat
+get_repoc_cmd() {
+	local _candidate
 
-	_feat="$("/usr/local/sbin/${PRODUCT}-repoc-static" -f 2>&1)"
+	for _candidate in \
+	    "/usr/local/sbin/${PRODUCT}-repoc-static" \
+	    "/usr/local/sbin/pfSense-repoc-static" \
+	    "/usr/local/sbin/nonSense-repoc-static"; do
+		if [ -x "${_candidate}" ]; then
+			echo -n "${_candidate}"
+			return 0
+		fi
+	done
+
+	return 1
+}
+
+get_repoc_feat() {
+	local _err _feat _repoc
+
+	_repoc="$(get_repoc_cmd 2>/dev/null)" || {
+		echo -n ""
+		return 0
+	}
+	_feat="$("${_repoc}" -f 2>&1)"
 	_err="${?}"
 	if [ "${_err}" -ne 0 ] || [ -z "${_feat}" ]; then
 		echo -n ""
@@ -271,20 +291,28 @@ EOF
 
 
 pfSense_repo_setup() {
-	local _fstyle _repoc_args
+	local _fstyle _repoc _repoc_args _tmp_conf_copy
 
-	cp "${PFSENSE_REPO_CONF}" "/tmp/${PRODUCT}.conf.copy"
+	_tmp_conf_copy="/tmp/${PRODUCT}.conf.copy"
+	if [ -f "${PFSENSE_REPO_CONF}" ]; then
+		cp "${PFSENSE_REPO_CONF}" "${_tmp_conf_copy}"
+	else
+		rm -f "${_tmp_conf_copy}"
+	fi
 
 	if [ -z "${NOUPDATE}" ]; then
-		_repoc_args=""
-		_fstyle="$(get_repoc_feat | /usr/bin/grep -c "repodir-new-fstyle")"
-		[ "${?}" -eq 0 ] && [ "${_fstyle}" = "1" ] && \
-		    _repoc_args="${_repoc_args} -N"
-		# Fetch the repository settings.
-		if ! "/usr/local/sbin/${PRODUCT}-repoc-static" $_repoc_args; then
-			echo "failed to update the repository settings!!!"
-			rm -f "/tmp/${PRODUCT}.conf.copy"
-			exit 1
+		_repoc="$(get_repoc_cmd 2>/dev/null || true)"
+		if [ -n "${_repoc}" ]; then
+			_repoc_args=""
+			_fstyle="$(get_repoc_feat | /usr/bin/grep -c "repodir-new-fstyle")"
+			[ "${?}" -eq 0 ] && [ "${_fstyle}" = "1" ] && \
+			    _repoc_args="${_repoc_args} -N"
+			# Fetch the repository settings.
+			if ! "${_repoc}" $_repoc_args; then
+				echo "failed to update the repository settings!!!"
+				rm -f "${_tmp_conf_copy}"
+				exit 1
+			fi
 		fi
 	fi
 
@@ -296,11 +324,12 @@ pfSense_repo_setup() {
 	err=$?
 
 	# If conf differs, may need force a pkg update
-	if ! cmp -s "${PFSENSE_REPO_CONF}" "/tmp/${PRODUCT}.conf.copy" && \
+	if [ -f "${_tmp_conf_copy}" ] && [ -f "${PFSENSE_REPO_CONF}" ] && \
+	    ! cmp -s "${PFSENSE_REPO_CONF}" "${_tmp_conf_copy}" && \
 	    [ "${err}" -eq 0 ]; then
 		err=14
 	fi
-	rm -f "/tmp/${PRODUCT}.conf.copy"
+	rm -f "${_tmp_conf_copy}"
 
 	return $err
 }

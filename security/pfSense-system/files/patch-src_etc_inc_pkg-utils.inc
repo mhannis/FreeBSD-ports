@@ -1,5 +1,30 @@
 --- src/etc/inc/pkg-utils.inc.orig
 +++ src/etc/inc/pkg-utils.inc
+@@ -88,7 +88,8 @@ function pkg_env($extra_env = array()) {
+ 		"HTTP_USER_AGENT" => $user_agent,
+ 		"ASSUME_ALWAYS_YES" => "true",
+ 		"FETCH_TIMEOUT" => 5,
+-		"FETCH_RETRY" => 2
++		"FETCH_RETRY" => 2,
++		"IGNORE_OSVERSION" => "true"
+ 	);
+ 
+ 	$http_proxy = config_get_path('system/proxyurl');
+@@ -400,7 +401,13 @@ function get_pkg_info($pkgs = 'all', $remote_repo_usage_disabled = false,
+ 	if (!$installed_pkgs_only || !$remote_repo_usage_disabled) {
+ 		$did_search = true;
+ 		/* Update the repository access credentials. */
+-		mwexec("/usr/local/sbin/{$g['product_name']}-repo-setup");
++		if (g_get('product_name') == 'nonSense') {
++			/* Prevent UI stalls from long/looping repo setup in custom builds. */
++			mwexec("/usr/bin/lockf -s -t 10 /tmp/nonSense-repo-setup.lock /usr/local/sbin/{$g['product_name']}-repo-setup >/dev/null 2>&1", true);
++		} else {
++			mwexec("/usr/local/sbin/{$g['product_name']}-repo-setup");
++		}
++
+ 		$search_rc = pkg_exec("search {$repo_param} " .
+ 		    "{$extra_param}-R --raw-format json-compact " .
+ 		    $pkgs, $search_out, $search_err);
 @@ -1282,45 +1282,78 @@
  	}
  }

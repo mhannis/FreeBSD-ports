@@ -1,6 +1,6 @@
 PORTNAME=	pfSense-upgrade
 PORTVERSION=	1.3.24
-PORTREVISION=	2
+PORTREVISION=	3
 CATEGORIES=	sysutils
 MASTER_SITES=	# empty
 DISTFILES=	# empty
@@ -22,7 +22,7 @@ PLIST_FILES=	libexec/install-boot.sh \
 
 .include <bsd.port.pre.mk>
 
-RUN_DEPENDS+=	pfSense-repoc>=0:sysutils/pfSense-repoc
+RUN_DEPENDS+=	pfSense-repo>=0:sysutils/pfSense-repo
 
 do-extract:
 	@${MKDIR} ${WRKSRC}

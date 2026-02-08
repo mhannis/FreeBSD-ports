@@ -1,7 +1,7 @@
 PORTNAME=	pfSense-system
 DISTVERSION=	${PRODUCT_VERSION}
 DISTVERSIONPREFIX=	v
-PORTREVISION=	2
+PORTREVISION=	3
 CATEGORIES=	security
 
 MAINTAINER=	coreteam@pfsense.org
@@ -28,14 +28,13 @@ RUN_DEPENDS=	bind-tools>=0:dns/bind-tools \
 		filterdns>=0:net/filterdns \
 		filterlog>=0:sysutils/filterlog \
 		hostapd>=0:net/hostapd \
-		if_pppoe-kmod>=0:net/if_pppoe-kmod \
 		igmpproxy>=0:net/igmpproxy \
 		ipmitool>=0:sysutils/ipmitool \
 		isc-dhcp44-client>=0:net/isc-dhcp44-client \
 		isc-dhcp44-relay>=0:net/isc-dhcp44-relay \
 		isc-dhcp44-server>=0:net/isc-dhcp44-server \
 		jq>0:textproc/jq \
-		kea>0:net/kea \
+		kea-devel>0:net/kea-devel \
 		libxml2>=0:textproc/libxml2 \
 		links>=0:www/links \
 		minicron>=0:sysutils/minicron \

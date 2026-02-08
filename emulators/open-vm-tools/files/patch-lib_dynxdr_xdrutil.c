@@ -1,5 +1,5 @@
---- open-vm-tools/lib/dynxdr/xdrutil.c.orig	2025-09-03 01:35:59 UTC
-+++ open-vm-tools/lib/dynxdr/xdrutil.c
+--- lib/dynxdr/xdrutil.c.orig	2025-09-03 01:35:59 UTC
++++ lib/dynxdr/xdrutil.c
 @@ -102,7 +102,7 @@
     xdrmem_create(&xdrs, src, srcLen, XDR_DECODE);
  

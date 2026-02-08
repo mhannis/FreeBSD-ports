@@ -35,6 +35,39 @@ _pkg() {
 	return $?
 }
 
+ensure_repo_metadata_seed() {
+	local _repo_dir="${PLUS_CERT_BASE}"
+	local _seed_conf="${_repo_dir}/${PRODUCT}-repo-devel.conf"
+	local _seed_name="${_repo_dir}/${PRODUCT}-repo-devel.name"
+	local _seed_descr="${_repo_dir}/${PRODUCT}-repo-devel.descr"
+	local _seed_default="${_repo_dir}/${PRODUCT}-repo-devel.default"
+
+	mkdir -p "${_repo_dir}" >/dev/null 2>&1
+
+	# If metadata already exists, keep current behavior untouched.
+	if ls "${_repo_dir}/${PRODUCT}-repo-"*.name >/dev/null 2>&1; then
+		return 0
+	fi
+
+	if [ -f "${PFSENSE_REPO_CONF}" ]; then
+		cp -f "${PFSENSE_REPO_CONF}" "${_seed_conf}"
+	else
+		cat > "${_seed_conf}" <<-EOF
+		${PRODUCT}: {
+			url: "http://127.0.0.1",
+			mirror_type: "none",
+			signature_type: "none",
+			enabled: yes,
+			priority: 0
+		}
+		EOF
+	fi
+
+	echo "devel" > "${_seed_name}"
+	echo "${PRODUCT} development branch" > "${_seed_descr}"
+	: > "${_seed_default}"
+}
+
 get_default_repo() {
 	local _pkg_repo_files="${PLUS_CERT_BASE}/${PRODUCT}-repo-*.name"
 	for file in ${_pkg_repo_files}; do
@@ -345,6 +378,11 @@ export PLUS_CERT_BASE="$("${PHP}" -n /usr/local/sbin/read_global_var pkg_repos_p
 export PRODUCT="$("${PHP}" -n /usr/local/sbin/read_global_var product_name pfSense)"
 export PFSENSE_REPO_CONF="/usr/local/etc/pkg/repos/${PRODUCT}.conf"
 export PKG_CONF="/usr/local/etc/pkg.conf"
+
+# Seed a minimal local branch metadata set when none exists so GUI branch
+# selectors are populated on custom builds.
+ensure_repo_metadata_seed
+
 PKG_REPO_CONF_PATH="$("${READ_XML_TAG}" string system/pkg_repo_conf_path)"
 # If the value is a repo name, get its path
 export PKG_REPO_CONF_PATH="$(get_repo_path "${PKG_REPO_CONF_PATH}")"

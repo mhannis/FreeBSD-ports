@@ -1246,10 +1246,11 @@ pkg_upgrade() {
 			unlock_pkg=1
 		fi
 
-		# If a new version of pfSense-upgrade is available, upgrade it
-		# and return a special code 99 used by wrapper to run newer
-		# version again using the same parameters
-		if [ "$(compare_pkg_version ${product}-upgrade)" != "=" ]; then
+		# If a newer ${product}-upgrade is available, upgrade it and
+		# return a special code 99 used by wrapper to run newer version
+		# again using the same parameters. Only "<" means upgrade needed;
+		# "!" means package is not installed.
+		if [ "$(compare_pkg_version ${product}-upgrade)" = "<" ]; then
 			_exec "pkg-static upgrade${dont_update} -f \
 			    ${product}-upgrade" "Upgrading ${product}-upgrade" \
 			    mute
@@ -2245,6 +2246,14 @@ export product_label=$(php -n /usr/local/sbin/read_global_var product_label pfSe
 export pkg_prefix=$(php -n /usr/local/sbin/read_global_var pkg_prefix \
     pfSense-pkg-)
 export platform=$(cat /etc/platform)
+
+# If this binary is invoked as nonSense-upgrade, enforce nonSense naming
+# when legacy/default globals still resolve to pfSense values.
+if [ "$(basename "$0")" = "nonSense-upgrade" ]; then
+	[ "${product}" = "pfSense" ] && product="nonSense"
+	[ "${product_label}" = "pfSense" ] && product_label="nonSense"
+	[ "${pkg_prefix}" = "pfSense-pkg-" ] && pkg_prefix="nonSense-pkg-"
+fi
 
 # nonSense repos may intentionally be built on a slightly newer
 # FreeBSD patchlevel than running userland.

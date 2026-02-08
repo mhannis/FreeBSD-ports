@@ -41,6 +41,8 @@ ensure_repo_metadata_seed() {
 	local _seed_name="${_repo_dir}/${PRODUCT}-repo-devel.name"
 	local _seed_descr="${_repo_dir}/${PRODUCT}-repo-devel.descr"
 	local _seed_default="${_repo_dir}/${PRODUCT}-repo-devel.default"
+	local _seed_abi="${_repo_dir}/${PRODUCT}-repo-devel.abi"
+	local _seed_altabi="${_repo_dir}/${PRODUCT}-repo-devel.altabi"
 
 	mkdir -p "${_repo_dir}" >/dev/null 2>&1
 
@@ -66,6 +68,20 @@ ensure_repo_metadata_seed() {
 	echo "devel" > "${_seed_name}"
 	echo "${PRODUCT} development branch" > "${_seed_descr}"
 	: > "${_seed_default}"
+
+	# Seed ABI/ALTABI so abi_setup() does not depend on fallback heuristics.
+	local _arch _fbsd_ver
+	_arch="$(uname -p)"
+	_fbsd_ver="$(uname -r | cut -d. -f1)"
+	echo "FreeBSD:${_fbsd_ver}:${_arch}" > "${_seed_abi}"
+	case "${_arch}" in
+	"amd64")
+		echo "freebsd:${_fbsd_ver}:x86:64" > "${_seed_altabi}" ;;
+	"aarch64")
+		echo "freebsd:${_fbsd_ver}:${_arch}:64" > "${_seed_altabi}" ;;
+	*)
+		echo "freebsd:${_fbsd_ver}:${_arch}" > "${_seed_altabi}" ;;
+	esac
 }
 
 get_default_repo() {
@@ -106,7 +122,7 @@ get_repo_id() {
 	# If the argument is a repo name, look for its path
 	_repo_conf="$(get_repo_path "${1}")"
 	_id="$(echo -n "${_repo_conf}" | \
-	    /usr/bin/sed 's/.*pfSense-repo-\(.*\).conf/\1/g')"
+	    /usr/bin/sed "s/.*${PRODUCT}-repo-\\(.*\\)\\.conf/\\1/g")"
 
 	echo -n "${_id}"
 }

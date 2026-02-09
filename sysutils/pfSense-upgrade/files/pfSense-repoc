@@ -1,0 +1,6 @@
+#!/bin/sh
+#
+# Stub replacement for Netgate's proprietary pfSense-repoc binary.
+# This allows the update checker to proceed without Netgate repo auth.
+#
+exit 0

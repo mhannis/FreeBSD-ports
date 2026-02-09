@@ -1,0 +1,21 @@
+--- src/etc/rc.php_ini_setup.orig
++++ src/etc/rc.php_ini_setup
+@@ -186,6 +186,9 @@
+ fi
+
+ # Get a loaded module list in the stock php
++# Determine product name for include paths (composer deps install under product name)
++PRODUCT_NAME=$(/usr/local/sbin/read_global_var product_name pfSense)
++
+ # Populate a dummy php.ini to avoid
+ # the file being clobbered and the firewall
+ # not being able to boot back up.
+@@ -210,7 +213,7 @@
+ html_errors = Off
+ zlib.output_compression = Off
+ zlib.output_compression_level = 1
+-include_path = ".:/etc/inc:/usr/local/pfSense/include:/usr/local/pfSense/include/www:/usr/local/www:/usr/local/captiveportal:/usr/local/pkg:/usr/local/www/classes:/usr/local/www/classes/Form:/usr/local/share/pear:/usr/local/share/openssl_x509_crl/"
++include_path = ".:/etc/inc:/usr/local/pfSense/include:/usr/local/pfSense/include/www:/usr/local/${PRODUCT_NAME}/include:/usr/local/${PRODUCT_NAME}/include/www:/usr/local/www:/usr/local/captiveportal:/usr/local/pkg:/usr/local/www/classes:/usr/local/www/classes/Form:/usr/local/share/pear:/usr/local/share/openssl_x509_crl/"
+ display_startup_errors=off
+ ; No need to display errors directly, they are handled in etc/inc/config.lib.inc by pfSense_clear_globals()
+ display_errors=off

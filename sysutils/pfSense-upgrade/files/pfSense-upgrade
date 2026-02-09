@@ -653,7 +653,7 @@ fetch_upgrade_packages() {
 		pkg_with_pb "fetch -yU ${desired_drm_package}" "Downloading drm"
 	fi
 	if [ -f /boot/modules/if_pppoe.ko ]; then
-		pkg_with_pb "fetch -yU if_pppoe-kmod" "Downloading if_pppoe-kmod"
+		_pkg fetch -yU if_pppoe-kmod 2>/dev/null || true
 	fi
 }
 
@@ -1031,7 +1031,7 @@ be_pkg_upgrade()
 	if is_amd64 && [ -n "${desired_drm_package}" ]; then
 		_exec "_pkg fetch -U ${desired_drm_package}" "Fetching drm package"
 	fi
-	_exec "_pkg fetch -U if_pppoe-kmod" "Fetching if_pppoe package"
+	_pkg fetch -U if_pppoe-kmod 2>/dev/null || true
 	pkg_with_pb "upgrade" "Upgrading packages in cloned boot environment ${UPGRADE_BE}"
 	if is_amd64 && [ -n "${desired_drm_package}" ]; then
 		drm_upgrade

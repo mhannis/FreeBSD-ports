@@ -43,6 +43,18 @@ ALTABI=$(cat ${REAL_CONF%%.conf}.altabi)
 echo "ABI=${ABI}" > ${PKG_CONF}
 echo "ALTABI=${ALTABI}" >> ${PKG_CONF}
 
+# Copy repo metadata to the etc path for the GUI branch selector
+SHARE_REPOS="/usr/local/share/%%PRODUCT_NAME%%/pkg/repos"
+ETC_REPOS="/usr/local/etc/%%PRODUCT_NAME%%/pkg/repos"
+if [ -d "${SHARE_REPOS}" ]; then
+	mkdir -p "${ETC_REPOS}"
+	for _ext in conf name descr default abi altabi; do
+		for _f in "${SHARE_REPOS}"/%%PRODUCT_NAME%%-repo*."${_ext}"; do
+			[ -f "${_f}" ] && cp -f "${_f}" "${ETC_REPOS}/"
+		done
+	done
+fi
+
 # Help users to fix fstab before risk moving to FreeBSD 11
 if /usr/bin/grep -q -E '/dev/ad[[:digit:]]' /etc/fstab; then
 	echo "===> Fixing bad /etc/fstab"

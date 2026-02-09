@@ -64,6 +64,7 @@ PKG_REPO_OSVER_${b}=	master
 .  endif
 PLIST_FILES+=		${DATADIR}/pkg/repos/${PKG_REPO_FILENAME_${b}}.conf ${DATADIR}/pkg/repos/${PKG_REPO_FILENAME_${b}}.descr
 PLIST_FILES+=		${DATADIR}/pkg/repos/${PKG_REPO_FILENAME_${b}}.abi ${DATADIR}/pkg/repos/${PKG_REPO_FILENAME_${b}}.altabi
+PLIST_FILES+=		${DATADIR}/pkg/repos/${PKG_REPO_FILENAME_${b}}.name
 . endif
 .endfor
 
@@ -89,6 +90,7 @@ do-build:
 		-e "s,%%VERSION%%,${REPO_BRANCH_PREFIX}${PKG_REPO_BRANCH_${b}},g" \
 		${WRKSRC}/${PKG_REPO_FILENAME_${b}}.conf
 	echo "${PKG_REPO_DESCR_${b}}" > ${WRKSRC}/${PKG_REPO_FILENAME_${b}}.descr
+	echo "${b:tl}" > ${WRKSRC}/${PKG_REPO_FILENAME_${b}}.name
 . endif
 . if defined(PKG_REPO_MAJORVER_${b}) && !empty(PKG_REPO_MAJORVER_${b})
 	echo "${OPSYS}:${PKG_REPO_MAJORVER_${b}}:${ARCH}" > ${WRKSRC}/${PKG_REPO_FILENAME_${b}}.abi
@@ -108,6 +110,7 @@ do-install:
 	${INSTALL_DATA} ${WRKSRC}/${PKG_REPO_FILENAME_${b}}.descr ${STAGEDIR}${DATADIR}/pkg/repos
 	${INSTALL_DATA} ${WRKSRC}/${PKG_REPO_FILENAME_${b}}.abi ${STAGEDIR}${DATADIR}/pkg/repos
 	${INSTALL_DATA} ${WRKSRC}/${PKG_REPO_FILENAME_${b}}.altabi ${STAGEDIR}${DATADIR}/pkg/repos
+	${INSTALL_DATA} ${WRKSRC}/${PKG_REPO_FILENAME_${b}}.name ${STAGEDIR}${DATADIR}/pkg/repos
 . endif
 .endfor
 	${ECHO_CMD} ${PFSENSE_PKG_SET_VERSION} \

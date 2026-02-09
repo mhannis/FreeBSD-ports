@@ -26,10 +26,10 @@ PFSENSE_PKG_SET_VERSION?=	${DISTVERSION}
 
 .include <bsd.port.pre.mk>
 
-MIRROR_TYPE?=	srv
+MIRROR_TYPE?=	http
 PFSENSE_DEFAULT_REPO?=	pfSense-repo-devel
 PFSENSE_DEFAULT_REPO_${ARCH}?=	${PFSENSE_DEFAULT_REPO}
-SIGNATURE_TYPE?=	fingerprints
+SIGNATURE_TYPE?=	none
 DEFAULT_REPO=	${DATADIR}/pkg/repos/${PFSENSE_DEFAULT_REPO_${ARCH}}.conf
 PLIST_FILES=	${DEFAULT_REPO}.default \
 		${DATADIR}/next_pkg_set_version
